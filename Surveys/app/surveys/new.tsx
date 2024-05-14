@@ -1,15 +1,22 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View, Button } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function CreateSurvey() {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["1", "2", "3"]);
 
+  const { user } = useAuth();
+
   const createSurvey = () => {
     console.warn("생성");
   };
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
 
   return (
     <View style={styles.container}>

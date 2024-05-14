@@ -16,6 +16,7 @@ export default function HomeScreen() {
       }
       setSurveys(data);
     };
+
     fetchSurveys();
   }, []);
 
@@ -27,6 +28,11 @@ export default function HomeScreen() {
           headerRight: () => (
             <Link href={"/surveys/new"}>
               <AntDesign name="plus" size={20} color="gray" />
+            </Link>
+          ),
+          headerLeft: () => (
+            <Link href={"/login"}>
+              <AntDesign name="user" size={20} color="gray" />
             </Link>
           ),
         }}

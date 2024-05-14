@@ -1,19 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { Text, View, StyleSheet, Pressable, Button } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  Button,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
-const survey = {
-  question: "탕수육 찍먹 vs 탕수육 부먹",
-  options: ["찍먹", "부먹"],
-};
+import { Survey } from "@/types/db";
+import { supabase } from "@/lib/supabase";
 
 export default function SurveyDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [selected, setSelected] = useState("찍먹");
+  const [survey, setSurvey] = useState<Survey>(null);
+
+  const [selected, setSelected] = useState("");
+
+  useEffect(() => {
+    const fetchSurveys = async () => {
+      let { data, error } = await supabase
+        .from("surveys")
+        .select("*")
+        .eq("id", Number.parseInt(id))
+        .single();
+
+      if (error) {
+        Alert.alert("데이터 로드 실패");
+      }
+      setSurvey(data);
+    };
+
+    fetchSurveys();
+  }, []);
 
   const vote = () => {
     console.warn("Vote: ", selected);
   };
+
+  if (!survey) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <View style={styles.container}>

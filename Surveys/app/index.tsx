@@ -4,9 +4,10 @@ import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Survey } from "../types/db";
 
 export default function HomeScreen() {
-  const [surveys, setSurveys] = useState([]);
+  const [surveys, setSurveys] = useState<Survey[]>([]);
 
   useEffect(() => {
     const fetchSurveys = async () => {

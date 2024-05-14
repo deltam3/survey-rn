@@ -42,7 +42,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.container}
         renderItem={({ item }) => (
           <Link href={`/surveys/${item.id}`} style={styles.surveyContainer}>
-            <Text style={styles.surveyTitle}>설문 질문</Text>
+            <Text style={styles.surveyTitle}>{item.question}</Text>
           </Link>
         )}
       />

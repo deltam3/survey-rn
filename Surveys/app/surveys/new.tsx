@@ -1,17 +1,39 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, View, Button } from "react-native";
+import { StyleSheet, Text, TextInput, View, Button, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useAuth } from "@/providers/AuthProvider";
+import { supabase } from "@/lib/supabase";
 
 export default function CreateSurvey() {
   const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState(["1", "2", "3"]);
+  const [options, setOptions] = useState(["", "", ""]);
+  const [error, setError] = useState("");
 
   const { user } = useAuth();
 
-  const createSurvey = () => {
-    console.warn("생성");
+  const createSurvey = async () => {
+    setError("");
+    if (!question) {
+      setError("질문을 적어주세요");
+      return;
+    }
+    const validOptions = options.filter((o) => !!o);
+    if (validOptions.length < 2) {
+      setError("최소 2개의 선택지를 적어주세요.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("surveys")
+      .insert([{ question, options: validOptions }])
+      .select();
+
+    if (error) {
+      Alert.alert("설문 생성 실패");
+      return;
+    }
+    router.back();
   };
 
   if (!user) {
@@ -60,6 +82,7 @@ export default function CreateSurvey() {
         onPress={() => setOptions([...options, ""])}
       />
       <Button title="설문 작성하기" onPress={createSurvey} />
+      <Text style={{ color: "crimson" }}>{error}</Text>
     </View>
   );
 }

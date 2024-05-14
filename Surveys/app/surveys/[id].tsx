@@ -10,14 +10,17 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { Survey } from "@/types/db";
+import { Survey, Vote } from "@/types/db";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function SurveyDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [survey, setSurvey] = useState<Survey>(null);
-
+  const [userVote, setUserVote] = useState<Vote>(null);
   const [selected, setSelected] = useState("");
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -33,11 +36,49 @@ export default function SurveyDetails() {
       setSurvey(data);
     };
 
+    const fetchUserVote = async () => {
+      if (!user) {
+        return;
+      }
+      let { data, error } = await supabase
+        .from("votes")
+        .select("*")
+        .eq("survey_id", Number.parseInt(id))
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
+
+      setUserVote(data);
+      if (data) {
+        setSelected(data.option);
+      }
+    };
+
     fetchSurveys();
+    fetchUserVote();
   }, []);
 
-  const vote = () => {
-    console.warn("Vote: ", selected);
+  const vote = async () => {
+    const newVote = {
+      option: selected,
+      survey_id: survey.id,
+      user_id: user?.id,
+    };
+    if (userVote) {
+      newVote.id = userVote.id;
+    }
+    const { data, error } = await supabase
+      .from("votes")
+      .upsert([newVote])
+      .select()
+      .single();
+
+    if (error) {
+      Alert.alert("투표 실패");
+    } else {
+      setUserVote(data);
+      Alert.alert("투표해주셔서 감사합니다.");
+    }
   };
 
   if (!survey) {
